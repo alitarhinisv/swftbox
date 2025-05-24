@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: swftbox
+      POSTGRES_PASSWORD: swftbox
+      POSTGRES_DB: swftbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"  # AMQP protocol port
+      - "15672:15672"  # Management interface port
+    environment:
+      RABBITMQ_DEFAULT_USER: swftbox
+      RABBITMQ_DEFAULT_PASS: swftbox
+
+volumes:
+  postgres_data:
