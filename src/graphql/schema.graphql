@@ -1,0 +1,58 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Order {
+  id: ID!
+  orderId: String!
+  customerEmail: String!
+  productSku: String!
+  quantity: Float!
+  address: String!
+  city: String!
+  status: OrderStatus!
+  errorReason: String
+  createdAt: DateTime!
+  processedAt: DateTime!
+  upload: FileUpload!
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type FileUpload {
+  id: ID!
+  filename: String!
+  totalOrders: Float!
+  status: UploadProcessingStatus!
+  createdAt: DateTime!
+  orders: [Order!]!
+}
+
+enum UploadProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+type Query {
+  getUploadStatus(uploadId: ID!): FileUpload!
+  getOrders(uploadId: ID!, status: String, limit: Float! = 20): [Order!]!
+}
+
+type Mutation {
+  uploadOrders(file: Upload!): FileUpload!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
