@@ -2,13 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UploadService } from './upload.service';
-import { Upload, UploadProcessingStatus } from '../../entities/upload.entity';
+import {
+  FileUpload,
+  UploadProcessingStatus,
+} from '../../entities/upload.entity';
 import { Order, OrderStatus } from '../../entities/order.entity';
 import { QueueService } from '../queue/queue.service';
 
 describe('UploadService', () => {
   let service: UploadService;
-  let uploadRepository: Repository<Upload>;
+  let uploadRepository: Repository<FileUpload>;
   let orderRepository: Repository<Order>;
   let queueService: QueueService;
 
@@ -17,7 +20,7 @@ describe('UploadService', () => {
       providers: [
         UploadService,
         {
-          provide: getRepositoryToken(Upload),
+          provide: getRepositoryToken(FileUpload),
           useValue: {
             save: jest.fn(),
             findOne: jest.fn(),
@@ -45,8 +48,8 @@ describe('UploadService', () => {
     }).compile();
 
     service = module.get<UploadService>(UploadService);
-    uploadRepository = module.get<Repository<Upload>>(
-      getRepositoryToken(Upload),
+    uploadRepository = module.get<Repository<FileUpload>>(
+      getRepositoryToken(FileUpload),
     );
     orderRepository = module.get<Repository<Order>>(getRepositoryToken(Order));
     queueService = module.get<QueueService>(QueueService);
@@ -58,14 +61,17 @@ describe('UploadService', () => {
 
   describe('processUpload', () => {
     it('should create upload record and process orders', async () => {
-      const mockUpload = new Upload();
+      const mockUpload = new FileUpload();
       mockUpload.id = '1';
-      mockUpload.filename = 'test.csv';
+      mockUpload.filename = 'sample-orders.csv';
       mockUpload.status = UploadProcessingStatus.PENDING;
 
       jest.spyOn(uploadRepository, 'save').mockResolvedValue(mockUpload);
 
-      const result = await service.processUpload('test.csv', 'test.csv');
+      const result = await service.processUpload(
+        'sample-orders.csv',
+        'sample-orders.csv',
+      );
 
       expect(result).toEqual(mockUpload);
       expect(uploadRepository.save).toHaveBeenCalled();
@@ -74,7 +80,7 @@ describe('UploadService', () => {
 
   describe('getUploadStatus', () => {
     it('should return upload status with order counts', async () => {
-      const mockUpload = new Upload();
+      const mockUpload = new FileUpload();
       mockUpload.id = '1';
       mockUpload.totalOrders = 2;
       mockUpload.orders = [
