@@ -45,9 +45,16 @@ enum UploadProcessingStatus {
   FAILED
 }
 
+type CityMetric {
+  city: String!
+  orderCount: Int!
+  totalQuantity: Int!
+}
+
 type Query {
   getUploadStatus(uploadId: ID!): FileUpload!
   getOrders(uploadId: ID!, status: String, limit: Float! = 20): [Order!]!
+  getOrdersByCity: [CityMetric!]!
 }
 
 type Mutation {
