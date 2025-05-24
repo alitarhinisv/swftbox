@@ -6,6 +6,7 @@ import { FileUpload } from './entities/upload.entity';
 import { Order } from './entities/order.entity';
 import { UploadModule } from './modules/upload/upload.module';
 import { OrderModule } from './modules/order/order.module';
+import { HealthModule } from './modules/health/health.module';
 import { GraphQLUpload } from 'graphql-upload-minimal';
 
 @Module({
@@ -30,6 +31,7 @@ import { GraphQLUpload } from 'graphql-upload-minimal';
     }),
     UploadModule,
     OrderModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
