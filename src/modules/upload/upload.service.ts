@@ -69,30 +69,20 @@ export class UploadService {
     // Save all orders first
     await this.orderRepository.save(orders);
 
-    // Process each order asynchronously
-    orders.forEach(async (order) => {
+    // Send each order to the queue
+    for (const order of orders) {
       try {
-        await this.processOrder(order);
+        order.status = OrderStatus.PROCESSING;
+        await this.orderRepository.save(order);
+
+        // Send to RabbitMQ and wait for confirmation
+        await this.queueService.sendOrderForProcessing(order).toPromise();
       } catch (error) {
         order.status = OrderStatus.FAILED;
         order.errorReason = error.message;
         await this.orderRepository.save(order);
       }
-    });
-  }
-
-  private async processOrder(order: Order) {
-    order.status = OrderStatus.PROCESSING;
-    await this.orderRepository.save(order);
-
-    // Mock processing stages with delays
-    await this.validateAddress(order);
-    await this.checkInventory(order);
-    await this.calculateShipping(order);
-    await this.assessRisk(order);
-
-    order.status = OrderStatus.COMPLETED;
-    await this.orderRepository.save(order);
+    }
   }
 
   private async validateAddress(order: Order): Promise<void> {
