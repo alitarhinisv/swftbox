@@ -9,7 +9,6 @@ export class QueueService {
   ) {}
 
   sendOrderForProcessing(order: Order) {
-    console.log('hello!!');
     return this.orderClient.emit('process_order', order);
   }
 }

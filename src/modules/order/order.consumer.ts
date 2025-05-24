@@ -13,7 +13,6 @@ export class OrderConsumer {
 
   @EventPattern('process_order')
   async handleOrderProcessing(order: Order) {
-    console.log('process_order');
     try {
       // Mock processing stages with delays
       await this.validateAddress(order);
