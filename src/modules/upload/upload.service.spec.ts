@@ -12,8 +12,6 @@ import { QueueService } from '../queue/queue.service';
 describe('UploadService', () => {
   let service: UploadService;
   let uploadRepository: Repository<FileUpload>;
-  let orderRepository: Repository<Order>;
-  let queueService: QueueService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -51,8 +49,6 @@ describe('UploadService', () => {
     uploadRepository = module.get<Repository<FileUpload>>(
       getRepositoryToken(FileUpload),
     );
-    orderRepository = module.get<Repository<Order>>(getRepositoryToken(Order));
-    queueService = module.get<QueueService>(QueueService);
   });
 
   it('should be defined', () => {
@@ -66,7 +62,10 @@ describe('UploadService', () => {
       mockUpload.filename = 'sample-orders.csv';
       mockUpload.status = UploadProcessingStatus.PENDING;
 
-      jest.spyOn(uploadRepository, 'save').mockResolvedValue(mockUpload);
+      // Fix: Use arrow function or cast the method
+      const saveSpy = jest
+        .spyOn(uploadRepository, 'save' as any)
+        .mockResolvedValue(mockUpload);
 
       const result = await service.processUpload(
         'sample-orders.csv',
@@ -74,7 +73,7 @@ describe('UploadService', () => {
       );
 
       expect(result).toEqual(mockUpload);
-      expect(uploadRepository.save).toHaveBeenCalled();
+      expect(saveSpy).toHaveBeenCalled();
     });
   });
 
@@ -88,12 +87,15 @@ describe('UploadService', () => {
         { status: OrderStatus.FAILED } as Order,
       ];
 
-      jest.spyOn(uploadRepository, 'findOne').mockResolvedValue(mockUpload);
+      // Fix: Use arrow function or cast the method
+      const findOneSpy = jest
+        .spyOn(uploadRepository, 'findOne' as any)
+        .mockResolvedValue(mockUpload);
 
       const result = await service.getUploadStatus('1');
 
       expect(result).toEqual(mockUpload);
-      expect(uploadRepository.findOne).toHaveBeenCalledWith({
+      expect(findOneSpy).toHaveBeenCalledWith({
         where: { id: '1' },
         relations: ['orders'],
       });
