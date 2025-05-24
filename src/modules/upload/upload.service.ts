@@ -85,40 +85,6 @@ export class UploadService {
     }
   }
 
-  private async validateAddress(order: Order): Promise<void> {
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 3000 + 2000),
-    );
-    // Mock validation logic
-  }
-
-  private async checkInventory(order: Order): Promise<void> {
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 3000 + 2000),
-    );
-    // Randomly fail 10% of inventory checks
-    if (Math.random() < 0.1) {
-      throw new Error('Insufficient inventory');
-    }
-  }
-
-  private async calculateShipping(order: Order): Promise<void> {
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 3000 + 2000),
-    );
-    // Mock shipping calculation
-  }
-
-  private async assessRisk(order: Order): Promise<void> {
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 3000 + 2000),
-    );
-    // Flag orders with more than 10 items
-    if (order.quantity > 10) {
-      throw new Error('High risk order detected');
-    }
-  }
-
   async getUploadStatus(uploadId: string): Promise<FileUpload> {
     const upload = await this.uploadRepository.findOne({
       where: { id: uploadId },
