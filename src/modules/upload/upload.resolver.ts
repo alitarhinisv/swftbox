@@ -20,7 +20,6 @@ export class UploadResolver {
     const uploadDir = './uploads';
     const filePath = `${uploadDir}/${filename}`;
 
-    // Ensure upload directory exists
     await new Promise<void>((resolve, reject) => {
       const stream = createReadStream()
         .pipe(createWriteStream(filePath))

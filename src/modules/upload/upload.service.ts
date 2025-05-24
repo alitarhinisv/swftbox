@@ -24,7 +24,7 @@ export class UploadService {
 
   async processUpload(filePath: string, filename: string): Promise<FileUpload> {
     this.logger.log(`Processing upload: ${filename}`);
-    
+
     // First parse the CSV file to get the orders
     const upload = new FileUpload();
     upload.filename = filename;
@@ -33,7 +33,7 @@ export class UploadService {
     // Parse CSV first to get total orders
     const orders = await this.parseCsvFile(filePath, upload);
     upload.totalOrders = orders.length;
-    
+
     this.logger.log(`Found ${orders.length} orders in ${filename}`);
 
     // Now save the upload with the total orders count
@@ -51,7 +51,7 @@ export class UploadService {
     upload: FileUpload,
   ): Promise<Order[]> {
     this.logger.debug(`Parsing CSV file: ${filePath}`);
-    
+
     return new Promise((resolve, reject) => {
       const orders: Order[] = [];
       createReadStream(filePath)
@@ -81,7 +81,7 @@ export class UploadService {
 
   private async processOrders(orders: Order[]) {
     this.logger.log(`Starting to process ${orders.length} orders`);
-    
+
     // Save all orders first
     await this.orderRepository.save(orders);
     this.logger.debug('Saved all orders to database');
@@ -89,6 +89,7 @@ export class UploadService {
     // Send each order to the queue
     for (const order of orders) {
       try {
+        // await sleep(10000); use this to simulate pending
         order.status = OrderStatus.PROCESSING;
         await this.orderRepository.save(order);
         this.logger.debug(`Sending order ${order.orderId} to processing queue`);
@@ -110,7 +111,7 @@ export class UploadService {
 
   async getUploadStatus(uploadId: string): Promise<FileUpload> {
     this.logger.debug(`Fetching status for upload: ${uploadId}`);
-    
+
     const upload = await this.uploadRepository.findOne({
       where: { id: uploadId },
       relations: ['orders'],
@@ -132,7 +133,7 @@ export class UploadService {
     this.logger.debug(
       `Fetching orders for upload ${uploadId} with status ${status || 'ALL'} (limit: ${limit})`,
     );
-    
+
     const query = this.orderRepository
       .createQueryBuilder('order')
       .where('order.uploadId = :uploadId', { uploadId })

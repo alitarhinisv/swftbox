@@ -16,7 +16,7 @@ export class OrderConsumer {
   @EventPattern('process_order')
   async handleOrderProcessing(order: Order) {
     this.logger.log(`Starting processing for order ${order.orderId}`);
-    
+
     try {
       // Mock processing stages with delays
       await this.validateAddress(order);
@@ -26,7 +26,9 @@ export class OrderConsumer {
 
       order.status = OrderStatus.COMPLETED;
       await this.orderRepository.save(order);
-      this.logger.log(`Successfully completed processing order ${order.orderId}`);
+      this.logger.log(
+        `Successfully completed processing order ${order.orderId}`,
+      );
     } catch (error) {
       order.status = OrderStatus.FAILED;
       order.errorReason = error.message;
@@ -44,7 +46,9 @@ export class OrderConsumer {
       await new Promise((resolve) =>
         setTimeout(resolve, Math.random() * 3000 + 2000),
       );
-      this.logger.debug(`Address validation completed for order ${order.orderId}`);
+      this.logger.debug(
+        `Address validation completed for order ${order.orderId}`,
+      );
     } catch (error) {
       this.logger.error(
         `Address validation failed for order ${order.orderId}: ${error.message}`,
@@ -76,7 +80,9 @@ export class OrderConsumer {
       await new Promise((resolve) =>
         setTimeout(resolve, Math.random() * 2000 + 1000),
       );
-      this.logger.debug(`Shipping calculation completed for order ${order.orderId}`);
+      this.logger.debug(
+        `Shipping calculation completed for order ${order.orderId}`,
+      );
     } catch (error) {
       this.logger.error(
         `Shipping calculation failed for order ${order.orderId}: ${error.message}`,
