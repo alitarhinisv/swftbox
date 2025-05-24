@@ -4,7 +4,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { FileUpload } from './entities/upload.entity';
 import { Order } from './entities/order.entity';
-import { OrderProcessingLog } from './entities/order-processing-log.entity';
 import { UploadModule } from './modules/upload/upload.module';
 import { OrderModule } from './modules/order/order.module';
 import { GraphQLUpload } from 'graphql-upload-minimal';
@@ -18,7 +17,7 @@ import { GraphQLUpload } from 'graphql-upload-minimal';
       username: 'swftbox',
       password: 'swftbox',
       database: 'swftbox',
-      entities: [FileUpload, Order, OrderProcessingLog],
+      entities: [FileUpload, Order],
       synchronize: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({

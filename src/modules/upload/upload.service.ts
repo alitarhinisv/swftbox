@@ -8,7 +8,6 @@ import {
   UploadProcessingStatus,
 } from '../../entities/upload.entity';
 import { Order, OrderStatus } from '../../entities/order.entity';
-import { OrderProcessingLog } from '../../entities/order-processing-log.entity';
 import { QueueService } from '../queue/queue.service';
 
 @Injectable()
