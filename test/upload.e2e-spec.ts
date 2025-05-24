@@ -1,65 +1,81 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { createReadStream } from 'fs';
 import { join } from 'path';
-import { AppModule } from '../src/app.module';
+import { createReadStream, writeFileSync, unlinkSync } from 'fs';
+import { AppModule } from './../src/app.module';
+import { UploadProcessingStatus } from '../src/entities/upload.entity';
+import { OrderStatus } from '../src/entities/order.entity';
+import { graphqlUploadExpress } from 'graphql-upload-minimal';
+import { getConnection } from 'typeorm';
 
-describe('Upload Flow (e2e)', () => {
+describe('Upload (e2e)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.use(graphqlUploadExpress());
     await app.init();
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  it('should upload a CSV file and process orders', async () => {
+    const testFilePath = join(__dirname, '..', 'sample-orders.csv');
 
-  it('should upload CSV and process orders', async () => {
-    const csvPath = join(__dirname, '../sample-orders.csv');
-    
-    // Upload mutation
+    // First, perform the file upload mutation
     const uploadResponse = await request(app.getHttpServer())
       .post('/graphql')
-      .field('operations', JSON.stringify({
-        query: `
+      .field(
+        'operations',
+        JSON.stringify({
+          query: `
           mutation($file: Upload!) {
             uploadOrders(file: $file) {
-              uploadId
+              id
+              filename
               totalOrders
+              status
             }
           }
         `,
-        variables: {
-          file: null,
-        },
-      }))
+          variables: {
+            file: null,
+          },
+        }),
+      )
       .field('map', JSON.stringify({ '0': ['variables.file'] }))
-      .attach('0', csvPath);
+      .attach('0', testFilePath);
 
     expect(uploadResponse.status).toBe(200);
-    expect(uploadResponse.body.data.uploadOrders).toHaveProperty('uploadId');
 
-    const uploadId = uploadResponse.body.data.uploadOrders.uploadId;
+    const uploadResult = uploadResponse.body.data.uploadOrders;
+    expect(uploadResult).toBeDefined();
+    expect(uploadResult.filename).toBe('sample-orders.csv');
+    expect(uploadResult.status).toBe(UploadProcessingStatus.PENDING);
+    expect(uploadResult.totalOrders).toBeGreaterThan(0);
 
-    // Check upload status
+    const uploadId = uploadResult.id;
+
+    // Then, check the upload status
     const statusResponse = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         query: `
           query($uploadId: ID!) {
             getUploadStatus(uploadId: $uploadId) {
-              uploadId
+              id
+              filename
               totalOrders
-              processedOrders
-              failedOrders
               status
+              orders {
+                id
+                orderId
+                status
+                errorReason
+              }
             }
           }
         `,
@@ -69,6 +85,35 @@ describe('Upload Flow (e2e)', () => {
       });
 
     expect(statusResponse.status).toBe(200);
-    expect(statusResponse.body.data.getUploadStatus).toHaveProperty('status');
+    const statusResult = statusResponse.body.data.getUploadStatus;
+    expect(statusResult).toBeDefined();
+    expect(statusResult.id).toBe(uploadId);
+    expect(statusResult.orders).toBeDefined();
+    expect(Array.isArray(statusResult.orders)).toBe(true);
+
+    // Finally, check the orders with different statuses
+    const ordersResponse = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query($uploadId: ID!, $status: String) {
+            getOrders(uploadId: $uploadId, status: $status) {
+              id
+              orderId
+              status
+              errorReason
+            }
+          }
+        `,
+        variables: {
+          uploadId,
+          status: OrderStatus.PENDING,
+        },
+      });
+
+    expect(ordersResponse.status).toBe(200);
+    const ordersResult = ordersResponse.body.data.getOrders;
+    expect(ordersResult).toBeDefined();
+    expect(Array.isArray(ordersResult)).toBe(true);
   });
 });
