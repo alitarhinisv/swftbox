@@ -32,10 +32,10 @@ export class OrderResolver {
       .groupBy('order.city')
       .getRawMany();
 
-    return result.map(row => ({
+    return result.map((row) => ({
       city: row.city,
       orderCount: parseInt(row.orderCount),
-      totalQuantity: parseInt(row.totalQuantity)
+      totalQuantity: parseInt(row.totalQuantity),
     }));
   }
-} 
+}
