@@ -124,15 +124,17 @@ export class UploadService {
     uploadId: string,
     status?: string,
     limit = 20,
+    offset = 0,
   ): Promise<Order[]> {
     this.logger.debug(
-      `Fetching orders for upload ${uploadId} with status ${status || 'ALL'} (limit: ${limit})`,
+      `Fetching orders for upload ${uploadId} with status ${status || 'ALL'} (limit: ${limit}, offset: ${offset})`,
     );
 
     const query = this.orderRepository
       .createQueryBuilder('order')
       .where('order.uploadId = :uploadId', { uploadId })
-      .take(limit);
+      .take(limit)
+      .skip(offset);
 
     if (status) {
       query.andWhere('order.status = :status', { status });

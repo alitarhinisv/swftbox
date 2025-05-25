@@ -49,7 +49,7 @@ enum OrderStatus {
 }
 
 type Query {
-  getOrders(limit: Float! = 20, status: String, uploadId: ID!): [Order!]!
+  getOrders(limit: Float! = 20, offset: Float! = 0, status: String, uploadId: ID!): [Order!]!
   getOrdersByCity: [CityMetric!]!
   getUploadStatus(uploadId: ID!): FileUpload!
 }

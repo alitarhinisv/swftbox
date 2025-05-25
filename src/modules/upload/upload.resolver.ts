@@ -42,7 +42,8 @@ export class UploadResolver {
     @Args('uploadId', { type: () => ID }) uploadId: string,
     @Args('status', { type: () => String, nullable: true }) status?: string,
     @Args('limit', { type: () => Number, defaultValue: 20 }) limit?: number,
+    @Args('offset', { type: () => Number, defaultValue: 0 }) offset?: number,
   ) {
-    return this.uploadService.getOrders(uploadId, status, limit);
+    return this.uploadService.getOrders(uploadId, status, limit, offset);
   }
 }
