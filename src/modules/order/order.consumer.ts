@@ -3,6 +3,7 @@ import { EventPattern } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderStatus } from '../../entities/order.entity';
+import { OrderProcessorService } from './order.processor.service';
 
 @Controller()
 export class OrderConsumer {
@@ -11,6 +12,7 @@ export class OrderConsumer {
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    private processorService: OrderProcessorService,
   ) {}
 
   @EventPattern('process_order')
@@ -18,12 +20,28 @@ export class OrderConsumer {
     this.logger.log(`Starting processing for order ${order.orderId}`);
 
     try {
-      // Mock processing stages with delays
-      await this.validateAddress(order);
-      await this.checkInventory(order);
-      await this.calculateShipping(order);
-      await this.assessRisk(order);
+      // Step 1: Validate Address
+      const coordinates = await this.processorService.validateAddress(order);
+      this.logger.debug(
+        `Address validated for order ${order.orderId} at coordinates: ${JSON.stringify(coordinates)}`,
+      );
 
+      // Step 2: Check Inventory
+      await this.processorService.checkInventory(order);
+      this.logger.debug(`Inventory checked for order ${order.orderId}`);
+
+      // Step 3: Calculate Shipping
+      const shippingDetails =
+        await this.processorService.calculateShipping(order);
+      this.logger.debug(
+        `Shipping calculated for order ${order.orderId}: ${JSON.stringify(shippingDetails)}`,
+      );
+
+      // Step 4: Assess Risk
+      await this.processorService.assessRisk(order);
+      this.logger.debug(`Risk assessment completed for order ${order.orderId}`);
+
+      // Update order status to completed
       order.status = OrderStatus.COMPLETED;
       await this.orderRepository.save(order);
       this.logger.log(
@@ -37,74 +55,6 @@ export class OrderConsumer {
         `Failed to process order ${order.orderId}: ${error.message}`,
         error.stack,
       );
-    }
-  }
-
-  private async validateAddress(order: Order): Promise<void> {
-    this.logger.debug(`Validating address for order ${order.orderId}`);
-    try {
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 3000 + 2000),
-      );
-      this.logger.debug(
-        `Address validation completed for order ${order.orderId}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Address validation failed for order ${order.orderId}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
-  private async checkInventory(order: Order): Promise<void> {
-    this.logger.debug(`Checking inventory for order ${order.orderId}`);
-    try {
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 2000 + 1000),
-      );
-      this.logger.debug(`Inventory check completed for order ${order.orderId}`);
-    } catch (error) {
-      this.logger.error(
-        `Inventory check failed for order ${order.orderId}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
-  private async calculateShipping(order: Order): Promise<void> {
-    this.logger.debug(`Calculating shipping for order ${order.orderId}`);
-    try {
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 2000 + 1000),
-      );
-      this.logger.debug(
-        `Shipping calculation completed for order ${order.orderId}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Shipping calculation failed for order ${order.orderId}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
-  private async assessRisk(order: Order): Promise<void> {
-    this.logger.debug(`Assessing risk for order ${order.orderId}`);
-    try {
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 2000 + 1000),
-      );
-      this.logger.debug(`Risk assessment completed for order ${order.orderId}`);
-    } catch (error) {
-      this.logger.error(
-        `Risk assessment failed for order ${order.orderId}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
     }
   }
 }
