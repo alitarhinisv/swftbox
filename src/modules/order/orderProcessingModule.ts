@@ -11,4 +11,4 @@ import { QueueModule } from '../queue/queue.module';
   providers: [OrderResolver, OrderProcessorService, OrderConsumer],
   exports: [OrderProcessorService],
 })
-export class OrderModule {}
+export class OrderProcessingModule {}

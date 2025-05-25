@@ -15,11 +15,17 @@ class CityMetric {
   totalQuantity: number;
 }
 
+interface CityMetricRaw {
+  city: string;
+  orderCount: string;
+  totalQuantity: string;
+}
+
 @Resolver()
 export class OrderResolver {
   constructor(
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
+    private readonly orderRepository: Repository<Order>,
   ) {}
 
   @Query(() => [CityMetric])
@@ -30,12 +36,12 @@ export class OrderResolver {
       .addSelect('COUNT(*)', 'orderCount')
       .addSelect('SUM(order.quantity)', 'totalQuantity')
       .groupBy('order.city')
-      .getRawMany();
+      .getRawMany<CityMetricRaw>();
 
     return result.map((row) => ({
       city: row.city,
-      orderCount: parseInt(row.orderCount),
-      totalQuantity: parseInt(row.totalQuantity),
+      orderCount: Number.parseInt(row.orderCount, 10),
+      totalQuantity: Number.parseInt(row.totalQuantity, 10),
     }));
   }
 }

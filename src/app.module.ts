@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FileUpload } from './entities/upload.entity';
 import { Order } from './entities/order.entity';
 import { UploadModule } from './modules/upload/upload.module';
-import { OrderModule } from './modules/order/order.module';
+import { OrderProcessingModule } from './modules/order/orderProcessingModule';
 import { HealthModule } from './modules/health/health.module';
 import { GraphQLUpload } from 'graphql-upload-minimal';
 
@@ -56,7 +56,7 @@ import { GraphQLUpload } from 'graphql-upload-minimal';
       },
     }),
     UploadModule,
-    OrderModule,
+    OrderProcessingModule,
     HealthModule,
   ],
 })
