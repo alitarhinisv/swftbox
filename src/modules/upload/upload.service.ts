@@ -25,22 +25,21 @@ export class UploadService {
   async processUpload(filePath: string, filename: string): Promise<FileUpload> {
     this.logger.log(`Processing upload: ${filename}`);
 
-    // First parse the CSV file to get the orders
     const upload = new FileUpload();
     upload.filename = filename;
     upload.status = UploadProcessingStatus.PENDING;
 
-    // Parse CSV first to get total orders
+    upload.status = UploadProcessingStatus.PROCESSING;
+
     const orders = await this.parseCsvFile(filePath, upload);
     upload.totalOrders = orders.length;
 
     this.logger.log(`Found ${orders.length} orders in ${filename}`);
+    upload.status = UploadProcessingStatus.COMPLETED;
 
-    // Now save the upload with the total orders count
     const savedUpload = await this.uploadRepository.save(upload);
     this.logger.debug(`Saved upload record with ID: ${savedUpload.id}`);
 
-    // Start processing orders
     this.processOrders(orders);
 
     return savedUpload;
@@ -82,19 +81,15 @@ export class UploadService {
   private async processOrders(orders: Order[]) {
     this.logger.log(`Starting to process ${orders.length} orders`);
 
-    // Save all orders first
     await this.orderRepository.save(orders);
     this.logger.debug('Saved all orders to database');
 
-    // Send each order to the queue
     for (const order of orders) {
       try {
-        // await sleep(10000); use this to simulate pending
         order.status = OrderStatus.PROCESSING;
         await this.orderRepository.save(order);
         this.logger.debug(`Sending order ${order.orderId} to processing queue`);
 
-        // Send to RabbitMQ and wait for confirmation
         await this.queueService.sendOrderForProcessing(order).toPromise();
         this.logger.debug(`Successfully queued order ${order.orderId}`);
       } catch (error) {
