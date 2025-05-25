@@ -2,19 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Transport } from '@nestjs/microservices';
 import { graphqlUploadExpress } from 'graphql-upload-minimal';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+  const configService = app.get(ConfigService);
+
   // Add this line to handle multipart/form-data uploads
   app.use(graphqlUploadExpress());
-  
+
   // Create a microservice instance
   const microservice = app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://swftbox:swftbox@localhost:5672'],
-      queue: 'order_processing',
+      urls: [configService.get('RABBITMQ_URL')],
+      queue: configService.get('RABBITMQ_QUEUE'),
       queueOptions: {
         durable: true,
       },
@@ -22,6 +24,6 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-  await app.listen(3000);
+  await app.listen(configService.get('PORT'));
 }
 bootstrap();
