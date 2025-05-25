@@ -9,5 +9,6 @@ import { QueueModule } from '../queue/queue.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Order]), QueueModule],
   providers: [OrderResolver, OrderProcessorService, OrderConsumer],
+  exports: [OrderProcessorService],
 })
 export class OrderModule {}

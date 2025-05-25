@@ -12,16 +12,16 @@ export class OrderConsumer implements OnModuleInit {
 
   constructor(
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
-    private processorService: OrderProcessorService,
-    private rabbitMQService: RabbitMQService,
+    private readonly orderRepository: Repository<Order>,
+    private readonly processorService: OrderProcessorService,
+    private readonly rabbitMQService: RabbitMQService,
   ) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     await this.setupConsumer();
   }
 
-  private async setupConsumer() {
+  private async setupConsumer(): Promise<void> {
     await this.rabbitMQService.consume(
       ORDER_PROCESSING_QUEUE,
       async (order: Order) => {
@@ -60,11 +60,17 @@ export class OrderConsumer implements OnModuleInit {
           );
         } catch (error) {
           order.status = OrderStatus.FAILED;
-          order.errorReason = error.message;
+          order.errorReason =
+            error instanceof Error ? error.message : 'Unknown error';
           await this.orderRepository.save(order);
+
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          const errorStack = error instanceof Error ? error.stack : undefined;
+
           this.logger.error(
-            `Failed to process order ${order.orderId}: ${error.message}`,
-            error.stack,
+            `Failed to process order ${order.orderId}: ${errorMessage}`,
+            errorStack,
           );
         }
       },

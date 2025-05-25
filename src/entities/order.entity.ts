@@ -7,7 +7,15 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, IsInt, Min, MaxLength, Matches, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsInt,
+  Min,
+  MaxLength,
+  Matches,
+  IsString,
+} from 'class-validator';
 import { FileUpload } from './upload.entity';
 
 export enum OrderStatus {
@@ -31,7 +39,9 @@ export class Order {
   @Field()
   @Column()
   @IsNotEmpty()
-  @Matches(/^ORD-\d{6}$/, { message: 'Order ID must be in format ORD-XXXXXX where X is a digit' })
+  @Matches(/^ORD-\d{6}$/, {
+    message: 'Order ID must be in format ORD-XXXXXX where X is a digit',
+  })
   orderId: string;
 
   @Field()
@@ -43,7 +53,10 @@ export class Order {
   @Field()
   @Column()
   @IsNotEmpty()
-  @Matches(/^SKU-[A-Z0-9]{8}$/, { message: 'Product SKU must be in format SKU-XXXXXXXX where X is a letter or digit' })
+  @Matches(/^SKU-[A-Z0-9]{8}$/, {
+    message:
+      'Product SKU must be in format SKU-XXXXXXXX where X is a letter or digit',
+  })
   productSku: string;
 
   @Field()

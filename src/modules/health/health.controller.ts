@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
@@ -7,7 +7,6 @@ import {
 } from '@nestjs/terminus';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { timeout, catchError } from 'rxjs/operators';
 import { of, firstValueFrom } from 'rxjs';
@@ -15,10 +14,10 @@ import { of, firstValueFrom } from 'rxjs';
 @Controller('health')
 export class HealthController {
   constructor(
-    private health: HealthCheckService,
-    private db: TypeOrmHealthIndicator,
-    @InjectDataSource() private dataSource: DataSource,
-    @Inject('HEALTH_CHECK') private client: ClientProxy,
+    private readonly health: HealthCheckService,
+    private readonly db: TypeOrmHealthIndicator,
+    @InjectDataSource() private readonly dataSource: DataSource,
+    @Inject('HEALTH_CHECK') private readonly client: ClientProxy,
   ) {}
 
   @Get()
@@ -48,7 +47,7 @@ export class HealthController {
           return {
             rabbitmq: {
               status: 'down',
-              error: error.message,
+              error: error instanceof Error ? error.message : 'Unknown error',
             },
           };
         }
