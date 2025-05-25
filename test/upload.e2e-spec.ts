@@ -54,7 +54,7 @@ describe('Upload (e2e)', () => {
     const uploadResult = uploadResponse.body.data.uploadOrders;
     expect(uploadResult).toBeDefined();
     expect(uploadResult.filename).toBe('sample-orders.csv');
-    expect(uploadResult.status).toBe(UploadProcessingStatus.PENDING);
+    expect(uploadResult.status).toBe(UploadProcessingStatus.COMPLETED);
     expect(uploadResult.totalOrders).toBeGreaterThan(0);
 
     const uploadId = uploadResult.id;

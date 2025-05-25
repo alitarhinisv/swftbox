@@ -60,7 +60,7 @@ describe('UploadService', () => {
       const mockUpload = new FileUpload();
       mockUpload.id = '1';
       mockUpload.filename = 'sample-orders.csv';
-      mockUpload.status = UploadProcessingStatus.PENDING;
+      mockUpload.status = UploadProcessingStatus.COMPLETED;
 
       // Fix: Use arrow function or cast the method
       const saveSpy = jest

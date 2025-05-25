@@ -1,98 +1,211 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# SwftBox - Order Processing System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+SwftBox is a robust order processing system built with NestJS and GraphQL. It handles CSV file uploads containing order data, processes them asynchronously, and provides real-time status updates through a GraphQL API.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- CSV File Upload: Bulk order processing through CSV file uploads
+- Asynchronous Processing: Orders are processed in the background using RabbitMQ
+- Real-time Status Updates: Track order processing status in real-time
+- Order Validation: Comprehensive validation of order data including:
+  - Address validation
+  - Inventory checking
+  - Shipping calculation
+  - Risk assessment
+- Detailed Logging: Comprehensive logging for debugging and monitoring
+- Pagination: Efficient data retrieval with offset-based pagination
+- Status Filtering: Filter orders by their processing status
+- Analytics: Order metrics aggregated by city
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture
 
-## Project setup
+### Tech Stack
+- **Backend Framework**: NestJS
+- **API**: GraphQL with Apollo Server
+- **Database**: PostgreSQL with TypeORM
+- **Message Queue**: RabbitMQ
+- **File Processing**: csv-parse
+- **Type Safety**: TypeScript
 
-```bash
-$ npm install
-```
+### Core Components
+1. **Upload Module**: Handles file uploads and initial processing
+2. **Order Module**: Manages order processing and status updates
+3. **Queue Module**: Handles asynchronous processing using RabbitMQ
+4. **Health Module**: System health monitoring
 
-## Compile and run the project
+### Data Flow
+1. Client uploads CSV file → Upload Service
+2. Upload Service parses file → Creates Order records
+3. Orders queued in RabbitMQ → Order Consumer processes each order
+4. Order Processor performs validations and updates status
+5. Client can query order status through GraphQL API
 
-```bash
-# development
-$ npm run start
+## Getting Started
 
-# watch mode
-$ npm run start:dev
+### Prerequisites
+- Node.js (v14 or higher)
+- PostgreSQL
+- RabbitMQ
+- Docker (optional)
 
-# production mode
-$ npm run start:prod
-```
+### Environment Setup
+Create a \`.env.development\` file in the root directory:
 
-## Run tests
+\`\`\`env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=swftbox
+DB_PASSWORD=swftbox
+DB_DATABASE=swftbox
 
-```bash
-# unit tests
-$ npm run test
+# RabbitMQ
+RABBITMQ_URL=amqp://swftbox:swftbox@localhost:5672
 
-# e2e tests
-$ npm run test:e2e
+# GraphQL
+GRAPHQL_PLAYGROUND=true
+CSRF_PREVENTION=false
 
-# test coverage
-$ npm run test:cov
-```
+# App
+NODE_ENV=development
+PORT=3000
+\`\`\`
 
-## Deployment
+### Installation
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+1. Clone the repository:
+   \`\`\`bash
+   git clone <repository-url>
+   cd swftbox
+   \`\`\`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+3. Start the database and RabbitMQ (using Docker):
+   \`\`\`bash
+   docker-compose up -d
+   \`\`\`
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+4. Run migrations:
+   \`\`\`bash
+   npm run typeorm:migration:run
+   \`\`\`
 
-## Resources
+5. Start the application:
+   \`\`\`bash
+   npm run start:dev
+   \`\`\`
 
-Check out a few resources that may come in handy when working with NestJS:
+### Usage
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+1. Access GraphQL Playground: http://localhost:3000/graphql
 
-## Support
+2. Upload Orders:
+   \`\`\`graphql
+   mutation UploadOrders($file: Upload!) {
+     uploadOrders(file: $file) {
+       id
+       filename
+       totalOrders
+       status
+     }
+   }
+   \`\`\`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+3. Check Upload Status:
+   \`\`\`graphql
+   query GetUploadStatus($uploadId: ID!) {
+     getUploadStatus(uploadId: $uploadId) {
+       id
+       filename
+       totalOrders
+       status
+       orders {
+         orderId
+         status
+       }
+     }
+   }
+   \`\`\`
 
-## Stay in touch
+4. Get Orders with Pagination:
+   \`\`\`graphql
+   query GetOrders($uploadId: ID!, $limit: Float, $offset: Float, $status: String) {
+     getOrders(uploadId: $uploadId, limit: $limit, offset: $offset, status: $status) {
+       orderId
+       customerEmail
+       status
+       errorReason
+     }
+   }
+   \`\`\`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+5. Get Order Metrics by City:
+   \`\`\`graphql
+   query GetOrdersByCity {
+     getOrdersByCity {
+       city
+       orderCount
+       totalQuantity
+     }
+   }
+   \`\`\`
+
+   This query returns aggregated order metrics for each city:
+   - `city`: Name of the city
+   - `orderCount`: Total number of orders from this city
+   - `totalQuantity`: Sum of quantities ordered from this city
+
+   Example response:
+   \`\`\`json
+   {
+     "data": {
+       "getOrdersByCity": [
+         {
+           "city": "New York",
+           "orderCount": 150,
+           "totalQuantity": 427
+         },
+         {
+           "city": "Los Angeles",
+           "orderCount": 89,
+           "totalQuantity": 234
+         }
+       ]
+     }
+   }
+   \`\`\`
+
+### CSV File Format
+Orders CSV should have the following columns:
+- order_id (format: ORD-XXXXXX)
+- customer_email
+- product_sku (format: SKU-XXXXXXXX)
+- quantity
+- address
+- city
+
+Example:
+\`\`\`csv
+order_id,customer_email,product_sku,quantity,address,city
+ORD-123456,customer@example.com,SKU-ABCD1234,2,"123 Main St",New York
+\`\`\`
+
+## Testing
+
+Run unit tests:
+\`\`\`bash
+npm run test
+\`\`\`
+
+Run e2e tests:
+\`\`\`bash
+npm run test:e2e
+\`\`\`
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+[MIT License](LICENSE)
