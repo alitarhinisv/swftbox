@@ -9,6 +9,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { OrderProcessingModule } from './modules/order/orderProcessingModule';
 import { HealthModule } from './modules/health/health.module';
 import { GraphQLUpload } from 'graphql-upload-minimal';
+import { OrderProcessingLog } from 'src/entities/order-processing-log.entity';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { GraphQLUpload } from 'graphql-upload-minimal';
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_DATABASE'),
-          entities: [FileUpload, Order],
+          entities: [FileUpload, Order, OrderProcessingLog],
           synchronize: configService.get('NODE_ENV') !== 'production',
           logging: configService.get('NODE_ENV') === 'development',
         };
