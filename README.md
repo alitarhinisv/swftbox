@@ -16,6 +16,7 @@ SwftBox is a robust order processing system built with NestJS and GraphQL. It ha
 - Pagination: Efficient data retrieval with offset-based pagination
 - Status Filtering: Filter orders by their processing status
 - Analytics: Order metrics aggregated by city
+- Health Monitoring: REST endpoint for system health checks
 
 ## Architecture
 
@@ -178,6 +179,42 @@ PORT=3000
      }
    }
    \`\`\`
+
+6. Health Check:
+   The application provides a REST endpoint for health monitoring:
+
+   ```bash
+   curl http://localhost:3000/health
+   ```
+
+   Response:
+   ```json
+   {
+     "status": "ok",
+     "info": {
+       "database": {
+         "status": "up"
+       },
+       "messageQueue": {
+         "status": "up"
+       }
+     },
+     "error": {},
+     "details": {
+       "database": {
+         "status": "up"
+       },
+       "messageQueue": {
+         "status": "up"
+       }
+     }
+   }
+   ```
+
+   The health check endpoint monitors:
+   - Database connection status
+   - RabbitMQ connection status
+   - Overall application health
 
 ### CSV File Format
 Orders CSV should have the following columns:
