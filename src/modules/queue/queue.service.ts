@@ -1,14 +1,13 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
 import { Order } from '../../entities/order.entity';
+import { RabbitMQService } from './rabbitmq.service';
+import { ORDER_PROCESSING_QUEUE } from 'src/modules/order/constants';
 
 @Injectable()
 export class QueueService {
-  constructor(
-    @Inject('ORDER_SERVICE') private readonly orderClient: ClientProxy,
-  ) {}
+  constructor(private readonly rabbitMQService: RabbitMQService) {}
 
-  sendOrderForProcessing(order: Order) {
-    return this.orderClient.emit('process_order', order);
+  async sendOrderForProcessing(order: Order): Promise<void> {
+    await this.rabbitMQService.publishMessage(ORDER_PROCESSING_QUEUE, order);
   }
 }

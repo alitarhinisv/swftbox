@@ -1,0 +1,7 @@
+order_id,customer_email,product_sku,quantity,address,city
+ORD001,test@example.com,SKU123,2,"123 Main St",Dubai
+ORD002,user@example.com,SKU456,15,"456 Park Ave",Abu Dhabi
+ORD003,customer@example.com,SKU789,5,"789 Business Bay",Dubai
+ORD004,client@example.com,SKU321,8,"321 Marina",Dubai
+ORD005,buyer@example.com,SKU654,3,"654 Corniche",Abu Dhabi
+ORD007,buyer2@example.com,SKU658,3,"652 Marina",New York

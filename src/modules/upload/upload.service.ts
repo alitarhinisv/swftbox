@@ -90,7 +90,7 @@ export class UploadService {
         await this.orderRepository.save(order);
         this.logger.debug(`Sending order ${order.orderId} to processing queue`);
 
-        await this.queueService.sendOrderForProcessing(order).toPromise();
+        await this.queueService.sendOrderForProcessing(order);
         this.logger.debug(`Successfully queued order ${order.orderId}`);
       } catch (error) {
         order.status = OrderStatus.FAILED;
